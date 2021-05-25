@@ -13,10 +13,71 @@ type Msg =
     | SelectSlot of Slot
 
 let random = Random()
+let north { X=x; Y=y } =
+    if y = 1
+    then None
+    else Some { X=x; Y=y-1 }
+
+let south { X=x; Y=y } =
+    if y=4 
+    then None
+    else Some {X=x; Y=y+1}
+
+let west {X=x; Y=y} =
+    if x = 1
+    then None
+    else Some { X=x-1; Y=y }
+
+let east { X=x; Y=y } =
+    if x = 4
+    then None
+    else Some {X=x+1; Y=y}
+
+let numberToPosition n = { X= 1+(n-1)%4; Y=1+(n-1)/4 }
+
+let positionToNumber {X=x; Y=y} = 4*(y-1) + x
+
+let numberToNeighbour n position= 
+    match n%4 with
+    | 0 -> position |> north
+    | 1 -> position |> south
+    | 2 -> position |> west
+    | _ -> position |> east
+
+
+let generateIntialPosition =
+    let positions = [|1 .. 16|]
+    let swap n m = 
+        let t = positions.[n-1]
+        positions.[n-1] <- positions.[m-1]
+        positions.[m-1] <- t
+        
+        
+    let random = Random()
+    
+    let freeindex (array:int array) = Array.IndexOf (array, 16)
+    let freenumber a = 1 + (a |>freeindex)
+
+    let iterations = 20
+
+    for j in [1..iterations] do
+      let r = random.Next()
+      let fp = freenumber positions |> numberToPosition
+      let swapNumberOption = numberToNeighbour r fp
+      
+      
+      swapNumberOption 
+      |> Option.map positionToNumber 
+      |> Option.map (fun n -> swap n (freenumber positions))
+      |> ignore
+    
+    positions
 
 let initialState () : AppState =
     let randomTags =
-        List.sortBy (fun _ -> random.Next()) [ 1 .. 16 ]
+        generateIntialPosition|> Array.toList
+        //List.sortBy id [1 .. 16]
+        //List.sortBy (fun _ -> random.Next()) [ 1 .. 16 ]
     //generate slot positions
     [ for x in 0 .. 3 do
           for y in 0 .. 3 do
@@ -47,7 +108,7 @@ let slotSelected state position tag =
                           else
                               (slotPosition, slotTag)) }
 
-let stylesheet = Stylesheet.load "./fifteen-puzzle.module.css"
+//let stylesheet = Stylesheet.load "./fifteen-puzzle.module.css"
 
 (* let l1Distance position position' = 
     Math.Abs(position.X - position'.X) + Math.Abs(position.Y - position'.Y) *)
@@ -67,3 +128,19 @@ let gameSolved state =
     state.Slots 
     |> List.filter (fun (position, _) -> position <> state.FreePos)
     |> List.forall (fun (position, tag) -> inFinalPosition position tag)
+
+(* 
+let neightBours {X=x; Y=y} =
+    match x, y with
+    | x =1, y=1 -> [ { X=2; Y=1}; [X=1; Y=2]]
+    | x=4; y=1 -> [ {X=3; Y=1}; {X=4; Y=2}]
+    | _; y=1 -> [ { X=x+1; Y=y}; [X=x; Y=y+1]; [X=x-1; Y=y]] 
+     *)
+
+
+
+
+
+
+
+

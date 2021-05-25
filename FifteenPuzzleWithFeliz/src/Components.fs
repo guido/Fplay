@@ -56,8 +56,8 @@ type Components =
         let (appState, setAppState) =
             React.useStateWithUpdater (FifteenPuzzle.initialState ())
         
-        let stylesheet = FifteenPuzzle.stylesheet
-
+        //let stylesheet = FifteenPuzzle.stylesheet
+        let stylesheet = Stylesheet.load "./fifteen-puzzle.module.css"
         Html.div [ 
            prop.style [ style.textAlign.center ]
            prop.children [ 
@@ -98,14 +98,14 @@ type Components =
                                          then stylesheet.["movable-slot"]
                                          else null
                                      ] ] 
-                          if FifteenPuzzle.gameSolved appState 
-                          then Html.p "You win!!"                          
-                       ] 
-                        
-                ] 
 
-           ] 
+                      ]
 
+                   ] 
+               if FifteenPuzzle.gameSolved appState
+               then Html.div "YOU JUST WON!!"
+               else Html.none
+           ]
        ]
 
 
